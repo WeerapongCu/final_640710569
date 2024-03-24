@@ -16,7 +16,7 @@ class TodoItem {
       id: json['id'] as int,
       title: json['title'] as String,
       subtitle: json['subtitle'] as String,
-      image: 'https://cpsu-api-49b593d4e146.herokuapp.com/api/2_2566/final/web_types${json['image']}',
+      image: 'https://cpsu-api-49b593d4e146.herokuapp.com/api/2_2566/final/web_types${json['image']}' as String,
     );
   }
 }

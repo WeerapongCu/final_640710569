@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:final_640710569/helpers/my_list_tile.dart';
-import 'package:flutter/services.dart'; // Add this import
+import 'package:flutter/services.dart';
 import '../helpers/api_caller.dart';
 import '../helpers/dialog_utils.dart';
 import '../models/todo_item.dart';
@@ -16,6 +16,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<TodoItem> _todoItems = [];
+  TextEditingController urlController = TextEditingController();
+  TextEditingController detailsController = TextEditingController();
 
   @override
   void initState() {
@@ -30,6 +32,22 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _todoItems = list.map((e) => TodoItem.fromJson(e)).toList();
       });
+    } on Exception catch (e) {
+      showOkDialog(context: context, title: "Error", message: e.toString());
+    }
+  }
+
+  Future<void> _handlePost() async {
+    try {
+      await ApiCaller().post("endpoint", params: {
+        "url": urlController.text,
+        "details": detailsController.text,
+      });
+      // Clear text fields after posting
+      urlController.clear();
+      detailsController.clear();
+      // Optionally, reload todo items after posting
+      _loadTodoItems();
     } on Exception catch (e) {
       showOkDialog(context: context, title: "Error", message: e.toString());
     }
@@ -54,14 +72,28 @@ class _HomePageState extends State<HomePage> {
           children: [
             Center(child: Text("* ต้องกรอกข้อมูล *")),
             TextField(
+              controller: urlController,
               decoration: const InputDecoration(
                 labelText: 'URL',
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 8.0),
+            TextFormField(
+              controller: detailsController,
+              decoration: const InputDecoration(
+                labelText: 'รายละเอียด',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 8.0),
+            ElevatedButton(
+              onPressed: _handlePost,
+              child: Text('Post'),
+            ),
+            const SizedBox(height: 8.0),
             const Text(
-              'รายละเอียด',
+              'รายการที่มี',
               style: TextStyle(fontSize: 18.0),
             ),
             Expanded(
@@ -69,14 +101,16 @@ class _HomePageState extends State<HomePage> {
                 itemCount: _todoItems.length,
                 itemBuilder: (context, index) {
                   final todoItem = _todoItems[index];
-                  return MyListTile(
-                    id: todoItem.id.toString(),
-                    title: todoItem.title,
-                    subtitle: todoItem.subtitle,
-                    image: todoItem.image,
-                    onTap: () {
-                      // Handle item tap
-                    },
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Image.network(
+                      todoItem.image,
+                      errorBuilder: (BuildContext context, Object error,
+                          StackTrace? stackTrace) {
+                        return Text(
+                            todoItem.image); // Placeholder or error message
+                      },
+                    ),
                   );
                 },
               ),

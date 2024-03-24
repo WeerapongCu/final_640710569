@@ -7,7 +7,7 @@ class ApiCaller {
   static final _dio = Dio(BaseOptions(responseType: ResponseType.plain));
   String endpoint = 'web_types';
 
-  Future<String> get(String s, {Map<String, dynamic>? params}) async {
+  Future<String> get(String endpoint, {Map<String, dynamic>? params}) async {
     try {
       final response =
           await _dio.get('$baseUrl/$endpoint', queryParameters: params);
